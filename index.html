@@ -61,9 +61,11 @@ button:disabled{opacity:.6}
     <select id="nama"><option value="">Pilih nama kamu</option></select>
     <p class="err" id="eNama"></p>
 
-    <label for="pin">PIN pribadi</label>
-    <input id="pin" class="angka" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••">
-    <p class="err" id="ePin"></p>
+    <div id="boxPin">
+      <label for="pin">PIN pribadi</label>
+      <input id="pin" class="angka" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••">
+      <p class="err" id="ePin"></p>
+    </div>
 
     <label for="kode">Kode di layar mentor</label>
     <input id="kode" class="angka" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000">
@@ -123,6 +125,7 @@ function idPerangkat() {
   return ambil('absenPerangkat') || id;
 }
 function bersih() { ['eNama', 'ePin', 'eKode', 'eSelfie', 'eUmum'].forEach(x => $(x).textContent = ''); }
+function r_pin() { return !(INFO && INFO.pin === false); }
 function salah(id, pesan) { $(id).textContent = pesan; }
 
 api('mulai', { token: TOKEN })
@@ -142,6 +145,7 @@ function mulai(r) {
     { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   r.peserta.forEach(p => $('nama').add(new Option(p.nama, p.nim)));
   $('nama').value = ambil('absenNim');
+  $('boxPin').hidden = r.pin === false;
   $('boxSelfie').hidden = !r.selfie;
   batasAkhir = Date.now() + r.batasMenit * 60000;
   timer = setInterval(hitungMundur, 1000);
@@ -189,7 +193,7 @@ $('vForm').addEventListener('submit', e => {
     pin: $('pin').value, kode: $('kode').value, perangkat: idPerangkat(), selfie: foto
   };
   if (!d.nim) return salah('eNama', 'Pilih nama kamu dulu.');
-  if (d.pin.length !== 4) return salah('ePin', 'PIN terdiri dari 4 angka.');
+  if (r_pin() && d.pin.length !== 4) return salah('ePin', 'PIN terdiri dari 4 angka.');
   if (d.kode.length !== 4) return salah('eKode', 'Kode terdiri dari 4 angka.');
   if (INFO.selfie && !foto) return salah('eSelfie', 'Ambil selfie dulu.');
 
